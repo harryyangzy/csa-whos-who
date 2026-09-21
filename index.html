@@ -645,7 +645,14 @@
     document.getElementById("got").addEventListener("click", () => advance(true));
     document.getElementById("miss").addEventListener("click", () => advance(false));
     undoBtn.addEventListener("click", undo);
-    document.getElementById("shuffle").addEventListener("click", () => start(PEOPLE));
+    document.getElementById("shuffle").addEventListener("click", () => {
+      const left = [...missedPeople, ...deck.slice(index)];
+      if (!left.length) {
+        alert("Nothing left to shuffle — you got everyone.");
+        return;
+      }
+      start(left);
+    });
     document.getElementById("reset").addEventListener("click", () => {
       if (confirm("Reset the deck? Your progress will be cleared.")) start(PEOPLE);
     });
