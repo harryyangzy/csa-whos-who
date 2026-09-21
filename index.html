@@ -484,7 +484,9 @@
     document.getElementById("miss").addEventListener("click", () => advance(false));
     undoBtn.addEventListener("click", undo);
     document.getElementById("shuffle").addEventListener("click", () => start(PEOPLE));
-    document.getElementById("reset").addEventListener("click", () => start(PEOPLE));
+    document.getElementById("reset").addEventListener("click", () => {
+      if (confirm("Reset the deck? Your progress will be cleared.")) start(PEOPLE);
+    });
     document.getElementById("restart").addEventListener("click", () => start(PEOPLE));
     document.getElementById("retryMissed").addEventListener("click", () => {
       start(missedPeople.length ? missedPeople : PEOPLE);
