@@ -72,49 +72,20 @@
     }
 
     .menu-btn {
-      width: 36px;
-      height: 36px;
+      width: 40px;
+      height: 40px;
       padding: 0;
       border-radius: 10px;
       background: var(--surface);
-      color: var(--muted);
-      font-size: 1.25rem;
+      color: var(--text);
+      font-size: 1.35rem;
       line-height: 1;
       letter-spacing: 0.05em;
       display: grid;
       place-items: center;
     }
 
-    .menu-btn:hover { color: var(--text); }
-
-    .menu-pop {
-      display: none;
-      position: absolute;
-      top: calc(100% + 6px);
-      right: 0;
-      min-width: 160px;
-      background: var(--surface);
-      border: 1px solid var(--surface-2);
-      border-radius: 12px;
-      padding: 6px;
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-      z-index: 40;
-    }
-
-    .menu-pop.open { display: block; }
-
-    .menu-pop button {
-      width: 100%;
-      text-align: left;
-      background: transparent;
-      color: var(--text);
-      padding: 12px 14px;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-    }
-
-    .menu-pop button:hover { background: var(--surface-2); }
+    .menu-btn:hover { color: var(--accent); }
 
     .gallery {
       display: none;
@@ -135,7 +106,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 14px;
+      gap: 10px;
+      margin-bottom: 12px;
       flex-shrink: 0;
     }
 
@@ -143,6 +115,27 @@
       font-size: 1.1rem;
       font-weight: 700;
       letter-spacing: -0.02em;
+    }
+
+    .gallery-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+
+    .gallery-tabs button {
+      background: var(--surface);
+      color: var(--muted);
+      padding: 10px 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .gallery-tabs button.active {
+      background: var(--accent-dim);
+      color: var(--accent);
     }
 
     .gallery-close {
@@ -153,6 +146,15 @@
       background: var(--surface);
       color: var(--muted);
       font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .gallery-empty {
+      color: var(--muted);
+      text-align: center;
+      padding: 40px 16px;
+      font-size: 0.95rem;
+      line-height: 1.4;
     }
 
     .gallery-scroll {
@@ -430,10 +432,7 @@
     <div class="brand">CSA Who's Who</div>
     <div class="header-right">
       <div class="progress" id="progress">1 / 32</div>
-      <button type="button" class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">⋮</button>
-      <div class="menu-pop" id="menuPop" role="menu">
-        <button type="button" id="openGallery" role="menuitem">Gallery</button>
-      </div>
+      <button type="button" class="menu-btn" id="menuBtn" aria-label="Open gallery">⋮</button>
     </div>
   </header>
   <div class="bar"><span id="bar"></span></div>
@@ -477,8 +476,12 @@
 
   <div class="gallery" id="gallery" aria-hidden="true">
     <div class="gallery-head">
-      <h2>Everyone</h2>
+      <h2 id="galleryTitle">Still left</h2>
       <button type="button" class="gallery-close" id="closeGallery" aria-label="Close gallery">✕</button>
+    </div>
+    <div class="gallery-tabs">
+      <button type="button" class="active" id="tabLeft" data-mode="left">Still left</button>
+      <button type="button" id="tabAll" data-mode="all">Everyone</button>
     </div>
     <div class="gallery-scroll" id="galleryScroll"></div>
   </div>
@@ -650,6 +653,99 @@
     document.getElementById("retryMissed").addEventListener("click", () => {
       start(missedPeople.length ? missedPeople : PEOPLE);
     });
+
+    const gallery = document.getElementById("gallery");
+    const galleryScroll = document.getElementById("galleryScroll");
+    const galleryTitle = document.getElementById("galleryTitle");
+    const tabLeft = document.getElementById("tabLeft");
+    const tabAll = document.getElementById("tabAll");
+    const DEPT_ORDER = [
+      "Finance", "Events", "Graphics", "Marketing", "Member Relations", "Productions",
+    ];
+    let galleryMode = "left";
+
+    function remainingPeople() {
+      if (index >= deck.length) return [];
+      return deck.slice(index);
+    }
+
+    function renderGallery() {
+      const list = galleryMode === "left" ? remainingPeople() : PEOPLE.slice();
+      galleryTitle.textContent = galleryMode === "left" ? "Still left" : "Everyone";
+      tabLeft.classList.toggle("active", galleryMode === "left");
+      tabAll.classList.toggle("active", galleryMode === "all");
+      galleryScroll.innerHTML = "";
+
+      if (!list.length) {
+        const empty = document.createElement("div");
+        empty.className = "gallery-empty";
+        empty.textContent = galleryMode === "left"
+          ? "No cards left in this round."
+          : "No people found.";
+        galleryScroll.appendChild(empty);
+        return;
+      }
+
+      const byDept = {};
+      for (const p of list) (byDept[p.dept] ||= []).push(p);
+
+      for (const dept of DEPT_ORDER) {
+        const people = byDept[dept];
+        if (!people || !people.length) continue;
+        const label = document.createElement("div");
+        label.className = "gallery-dept";
+        label.textContent = dept;
+        galleryScroll.appendChild(label);
+
+        const grid = document.createElement("div");
+        grid.className = "gallery-grid";
+        for (const p of people) {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "gallery-item";
+          btn.innerHTML =
+            `<img src="images/${encodeURIComponent(p.file)}" alt="" loading="lazy" />` +
+            `<div class="g-name">${p.name}</div>`;
+          btn.addEventListener("click", () => {
+            const i = deck.findIndex((d) => d.file === p.file);
+            if (i >= 0) {
+              index = i;
+              done.classList.remove("show");
+              stage.classList.remove("hide");
+              actions.classList.remove("hide");
+              toolbar.classList.remove("hide");
+              show();
+            }
+            closeGallery();
+          });
+          grid.appendChild(btn);
+        }
+        galleryScroll.appendChild(grid);
+      }
+    }
+
+    function openGallery(mode) {
+      galleryMode = mode || galleryMode || "left";
+      renderGallery();
+      gallery.classList.add("open");
+      gallery.setAttribute("aria-hidden", "false");
+      document.body.classList.add("gallery-open");
+    }
+
+    function closeGallery() {
+      gallery.classList.remove("open");
+      gallery.setAttribute("aria-hidden", "true");
+      document.body.classList.remove("gallery-open");
+    }
+
+    document.getElementById("menuBtn").addEventListener("click", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openGallery("left");
+    });
+    document.getElementById("closeGallery").addEventListener("click", closeGallery);
+    tabLeft.addEventListener("click", () => openGallery("left"));
+    tabAll.addEventListener("click", () => openGallery("all"));
 
     // Swipe left/right after flip to mark miss/got
     let touchX = null;
