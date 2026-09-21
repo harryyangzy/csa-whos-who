@@ -64,11 +64,156 @@
       color: var(--accent);
     }
 
-    .progress {
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-variant-numeric: tabular-nums;
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
     }
+
+    .menu-btn {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 1.25rem;
+      line-height: 1;
+      letter-spacing: 0.05em;
+      display: grid;
+      place-items: center;
+    }
+
+    .menu-btn:hover { color: var(--text); }
+
+    .menu-pop {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      min-width: 160px;
+      background: var(--surface);
+      border: 1px solid var(--surface-2);
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      z-index: 40;
+    }
+
+    .menu-pop.open { display: block; }
+
+    .menu-pop button {
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: var(--text);
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .menu-pop button:hover { background: var(--surface-2); }
+
+    .gallery {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: var(--bg);
+      flex-direction: column;
+      padding: calc(12px + var(--safe-top)) 16px calc(12px + var(--safe-bottom));
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .gallery.open { display: flex; }
+
+    .gallery-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      flex-shrink: 0;
+    }
+
+    .gallery-head h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .gallery-close {
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: 1.2rem;
+    }
+
+    .gallery-scroll {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+
+    .gallery-dept {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin: 16px 0 10px;
+    }
+
+    .gallery-dept:first-child { margin-top: 0; }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .gallery-item {
+      background: transparent;
+      padding: 0;
+      border-radius: 12px;
+      text-align: left;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .gallery-item img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: cover;
+      object-position: center top;
+      border-radius: 12px;
+      display: block;
+      background: var(--surface);
+    }
+
+    .gallery-item .g-name {
+      font-size: 0.72rem;
+      margin-top: 6px;
+      line-height: 1.25;
+      font-weight: 600;
+    }
+
+    .gallery-item .g-dept {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 2px;
+      font-weight: 500;
+    }
+
+    body.gallery-open { overflow: hidden; }
+
 
     .bar {
       height: 3px;
@@ -283,7 +428,13 @@
 <body>
   <header>
     <div class="brand">CSA Who's Who</div>
-    <div class="progress" id="progress">1 / 32</div>
+    <div class="header-right">
+      <div class="progress" id="progress">1 / 32</div>
+      <button type="button" class="menu-btn" id="menuBtn" aria-label="Menu" aria-expanded="false">⋮</button>
+      <div class="menu-pop" id="menuPop" role="menu">
+        <button type="button" id="openGallery" role="menuitem">Gallery</button>
+      </div>
+    </div>
   </header>
   <div class="bar"><span id="bar"></span></div>
 
@@ -323,6 +474,14 @@
       <button type="button" id="reset">Reset</button>
     </div>
   </main>
+
+  <div class="gallery" id="gallery" aria-hidden="true">
+    <div class="gallery-head">
+      <h2>Everyone</h2>
+      <button type="button" class="gallery-close" id="closeGallery" aria-label="Close gallery">✕</button>
+    </div>
+    <div class="gallery-scroll" id="galleryScroll"></div>
+  </div>
 
   <script>
     const PEOPLE = [
