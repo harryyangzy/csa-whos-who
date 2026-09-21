@@ -674,7 +674,8 @@
         const swapWith = 1 + Math.floor(Math.random() * (next.length - 1));
         [next[0], next[swapWith]] = [next[swapWith], next[0]];
       }
-      start(next);
+      start(next, true);
+      progress.textContent = `Shuffled · 1 / ${deck.length}`;
     });
     document.getElementById("reset").addEventListener("click", () => {
       if (confirm("Reset the deck? Your progress will be cleared.")) start(PEOPLE);
@@ -716,6 +717,25 @@
         return;
       }
 
+      // Still left: show in current practice order (so shuffle is visible).
+      // Everyone: group by department.
+      if (galleryMode === "left") {
+        const grid = document.createElement("div");
+        grid.className = "gallery-grid";
+        list.forEach((p, n) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "gallery-item";
+          btn.innerHTML =
+            `<img src="images/${encodeURIComponent(p.file)}" alt="" loading="lazy" />` +
+            `<div class="g-name">${n + 1}. ${p.name}</div>`;
+          btn.addEventListener("click", () => jumpToPerson(p));
+          grid.appendChild(btn);
+        });
+        galleryScroll.appendChild(grid);
+        return;
+      }
+
       const byDept = {};
       for (const p of list) (byDept[p.dept] ||= []).push(p);
 
@@ -736,22 +756,24 @@
           btn.innerHTML =
             `<img src="images/${encodeURIComponent(p.file)}" alt="" loading="lazy" />` +
             `<div class="g-name">${p.name}</div>`;
-          btn.addEventListener("click", () => {
-            const i = deck.findIndex((d) => d.file === p.file);
-            if (i >= 0) {
-              index = i;
-              done.classList.remove("show");
-              stage.classList.remove("hide");
-              actions.classList.remove("hide");
-              toolbar.classList.remove("hide");
-              show();
-            }
-            closeGallery();
-          });
+          btn.addEventListener("click", () => jumpToPerson(p));
           grid.appendChild(btn);
         }
         galleryScroll.appendChild(grid);
       }
+    }
+
+    function jumpToPerson(p) {
+      const i = deck.findIndex((d) => d.file === p.file);
+      if (i >= 0) {
+        index = i;
+        done.classList.remove("show");
+        stage.classList.remove("hide");
+        actions.classList.remove("hide");
+        toolbar.classList.remove("hide");
+        show();
+      }
+      closeGallery();
     }
 
     function openGallery(mode) {
