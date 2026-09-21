@@ -213,6 +213,7 @@
       display: flex;
       gap: 8px;
       margin-top: 10px;
+      flex-shrink: 0;
     }
 
     .toolbar button {
@@ -305,11 +306,6 @@
       <button class="btn-got" id="got" type="button">Got it</button>
     </div>
 
-    <div class="toolbar" id="toolbar">
-      <button type="button" id="shuffle">Shuffle</button>
-      <button type="button" id="reset">Reset</button>
-    </div>
-
     <div class="done" id="done">
       <h2>Nice work</h2>
       <p id="doneMsg">You worked through the deck.</p>
@@ -319,6 +315,12 @@
       </div>
       <button class="restart" id="restart" type="button">Practice again</button>
       <button class="retry" id="retryMissed" type="button">Retry missed only</button>
+    </div>
+
+    <div class="toolbar" id="toolbar">
+      <button type="button" id="undo" disabled>Undo</button>
+      <button type="button" id="shuffle">Shuffle</button>
+      <button type="button" id="reset">Reset</button>
     </div>
   </main>
 
@@ -375,6 +377,12 @@
     let got = 0;
     let miss = 0;
     let missedPeople = [];
+    let history = [];
+    const undoBtn = document.getElementById("undo");
+
+    function updateUndo() {
+      undoBtn.disabled = history.length === 0;
+    }
 
     function shuffle(arr) {
       const a = [...arr];
@@ -392,10 +400,12 @@
       got = 0;
       miss = 0;
       missedPeople = [];
+      history = [];
       done.classList.remove("show");
       stage.classList.remove("hide");
       actions.classList.remove("hide");
       toolbar.classList.remove("hide");
+      updateUndo();
       show();
     }
 
@@ -413,6 +423,7 @@
       deptEl.textContent = person.dept;
       progress.textContent = `${index + 1} / ${deck.length}`;
       bar.style.width = `${(index / deck.length) * 100}%`;
+      updateUndo();
     }
 
     function flip() {
@@ -422,6 +433,7 @@
 
     function advance(knew) {
       const person = deck[index];
+      history.push({ knew, person });
       if (knew) got += 1;
       else {
         miss += 1;
@@ -431,10 +443,28 @@
       show();
     }
 
+    function undo() {
+      if (!history.length) return;
+      const last = history.pop();
+      if (last.knew) got = Math.max(0, got - 1);
+      else {
+        miss = Math.max(0, miss - 1);
+        const i = missedPeople.lastIndexOf(last.person);
+        if (i >= 0) missedPeople.splice(i, 1);
+      }
+      index = Math.max(0, index - 1);
+      done.classList.remove("show");
+      stage.classList.remove("hide");
+      actions.classList.remove("hide");
+      toolbar.classList.remove("hide");
+      show();
+    }
+
     function finish() {
       stage.classList.add("hide");
       actions.classList.add("hide");
-      toolbar.classList.add("hide");
+      // keep toolbar visible so Undo still works on the last card
+      toolbar.classList.remove("hide");
       done.classList.add("show");
       document.getElementById("statGot").textContent = got;
       document.getElementById("statMiss").textContent = miss;
@@ -446,11 +476,13 @@
         missedPeople.length ? "inline-block" : "none";
       bar.style.width = "100%";
       progress.textContent = "Done";
+      updateUndo();
     }
 
     card.addEventListener("click", flip);
     document.getElementById("got").addEventListener("click", () => advance(true));
     document.getElementById("miss").addEventListener("click", () => advance(false));
+    undoBtn.addEventListener("click", undo);
     document.getElementById("shuffle").addEventListener("click", () => start(PEOPLE));
     document.getElementById("reset").addEventListener("click", () => start(PEOPLE));
     document.getElementById("restart").addEventListener("click", () => start(PEOPLE));
