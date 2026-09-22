@@ -194,8 +194,8 @@
       width: 100%;
       aspect-ratio: 1;
       object-fit: cover;
-      object-position: center top;
-      border-radius: 12px;
+      object-position: center center;
+      border-radius: 50%;
       display: block;
       background: var(--surface);
     }
@@ -246,11 +246,17 @@
       perspective: 1200px;
       min-height: 0;
       position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .card {
-      width: 100%;
-      height: 100%;
+      width: min(100%, calc(100vh - 280px));
+      max-width: 100%;
+      aspect-ratio: 1;
+      height: auto;
+      max-height: 100%;
       position: relative;
       transform-style: preserve-3d;
       transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -264,7 +270,7 @@
       inset: 0;
       backface-visibility: hidden;
       -webkit-backface-visibility: hidden;
-      border-radius: var(--radius);
+      border-radius: 50%;
       overflow: hidden;
       background: var(--surface);
       display: flex;
@@ -274,36 +280,42 @@
       box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
     }
 
+    .face.front {
+      border: 3px solid var(--surface-2);
+    }
+
     .face.back {
       transform: rotateY(180deg);
       background: linear-gradient(160deg, #1e2a38 0%, #15202b 100%);
       padding: 24px;
       text-align: center;
+      border: 3px solid var(--accent-dim);
     }
 
     .face img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: center top;
+      object-position: center center;
       display: block;
     }
 
     .hint {
       position: absolute;
-      bottom: 14px;
+      bottom: 12%;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(15, 20, 25, 0.72);
       backdrop-filter: blur(8px);
       color: var(--text);
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 500;
-      padding: 8px 14px;
+      padding: 7px 12px;
       border-radius: 999px;
       pointer-events: none;
       opacity: 0.95;
       transition: opacity 0.2s;
+      white-space: nowrap;
     }
 
     .card.flipped .hint { opacity: 0; }
@@ -498,8 +510,8 @@
       { name: "Katherine Li", file: "katherine-li.jpg", dept: "Events" },
       { name: "Justin Xie", file: "justin-xie.jpg", dept: "Events" },
       { name: "Fred Fang", file: "fred-fang.jpg", dept: "Events" },
-      { name: "Emily Kam", file: "emily-kam.png", dept: "Events" },
-      { name: "Casper Chen", file: "casper-chen.png", dept: "Graphics" },
+      { name: "Emily Kam", file: "emily-kam.jpg", dept: "Events" },
+      { name: "Casper Chen", file: "casper-chen.jpg", dept: "Graphics" },
       { name: "Ethan Wen-Je Lee", file: "ethan-wen-je-lee.jpg", dept: "Graphics" },
       { name: "Xavier Zou", file: "xavier-zou.jpg", dept: "Graphics" },
       { name: "Christine Liang", file: "christine-liang.jpg", dept: "Graphics" },
@@ -509,7 +521,7 @@
       { name: "Megan Chui", file: "megan-chui.jpg", dept: "Marketing" },
       { name: "Andy Chen", file: "andy-chen.jpg", dept: "Marketing" },
       { name: "Clare Zhang", file: "clare-zhang.jpg", dept: "Member Relations" },
-      { name: "Nathan Hu", file: "nathan-hu.png", dept: "Member Relations" },
+      { name: "Nathan Hu", file: "nathan-hu.jpg", dept: "Member Relations" },
       { name: "Aubrey Yu", file: "aubrey-yu.jpg", dept: "Member Relations" },
       { name: "Matthew Qin", file: "matthew-qin.jpg", dept: "Member Relations" },
       { name: "Chloe Cheng", file: "chloe-cheng.jpg", dept: "Member Relations" },
